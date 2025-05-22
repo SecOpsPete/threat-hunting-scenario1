@@ -64,7 +64,7 @@ DeviceLogonEvents
 | where RemoteIP has_any(RemoteIPsInQuestion)
 ```
 
-> ✅ No results were returned, indicating NO successful logons from these IPs.
+## ✅ No results were returned, indicating NO successful logons from these IPs.
 
 Check for Any Successful Logons During 7 Days of Internet Exposure
 ```kql
