@@ -50,6 +50,10 @@ DeviceLogonEvents
 | summarize Attempts = count() by RemoteIP, DeviceName
 | order by Attempts desc
 ```
+## 🔐 Top Failed Logon Attempts
+
+![Top Failed Logon Attempts](./TopFailedLogon.png)
+
 
 Check if any of the top offending IPs succeeded:
 ```kql
@@ -74,10 +78,18 @@ DeviceLogonEvents
 | where ActionType == "LogonSuccess"
 | where AccountName == "labuser"
 ```
+## ✅ Successful Logons by Account
+
+![Successful Logon Events](./SuccessfulLogon(2).png)
+
 
 - Account: `labuser`
 - Number of failed logons: 0
 - IP address origin was verified and authorized
+
+## 🌐 Successful IP Address Origin
+
+![Successful IP Location](./SuccessfulIP.png)
 
 ---
 
