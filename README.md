@@ -99,7 +99,7 @@ DeviceLogonEvents
 
 ![Successful IP Location](./SuccessfulIP.png)
 
-> ✅ This IP address was correlated with an authorized user account and confirmed as the source of both valid logon events.
+> ✅ The IP address was clicked and correlated with an authorized user account and confirmed as the source of both valid logon events.
 ---
 
 ## 🧠 MITRE ATT&CK TTP Mapping
