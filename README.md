@@ -80,7 +80,7 @@ DeviceLogonEvents
 ```
 ## ✅ Successful Logons by Account
 
-![Successful Logon Events](./SuccessfulLogon (2).png)
+![Successful Logon Events](./SuccessfulLogonDevice.png)
 
 
 - Account: `labuser`
