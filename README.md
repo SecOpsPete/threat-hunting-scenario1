@@ -64,13 +64,21 @@ DeviceLogonEvents
 | where RemoteIP has_any(RemoteIPsInQuestion)
 ```
 
-> ✅ No results were returned, indicating no successful logons from these IPs.
+> ✅ No results were returned, indicating NO successful logons from these IPs.
+
+Check for Any Successful Logons During 7 Days of Internet Exposure
+```kql
+DeviceLogonEvents
+| where LogonType has_any("Network", "Interactive", "RemoteInteractive", "Unlock")
+| where ActionType == "LogonSuccess"
+| where RemoteIP has_any(RemoteIPsInQuestion)
+```
+
+## ✅ Verified Only 2 Successful Logins During 7 Day Internet Exposure
 
 ---
 
-## ✅ Verified Legitimate Logons
-
-Check for valid logons by a known account:
+Check Valid Logons by Known Account:
 ```kql
 DeviceLogonEvents
 | where DeviceName == "windows-target-1"
@@ -81,7 +89,6 @@ DeviceLogonEvents
 ## ✅ Successful Logons by Account
 
 ![Successful Logon Events](./SuccessfulLogonDevice.png)
-
 
 - Account: `labuser`
 - Number of failed logons: 0
