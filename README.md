@@ -66,7 +66,7 @@ DeviceLogonEvents
 
 ## ✅ No results were returned, indicating NO successful logons from these IPs.
 
-Check for Any Successful Logons During 7 Days of Internet Exposure
+Check for Any Successful Logons 
 ```kql
 DeviceLogonEvents
 | where LogonType has_any("Network", "Interactive", "RemoteInteractive", "Unlock")
@@ -90,6 +90,7 @@ DeviceLogonEvents
 
 ![Successful Logon Events](./SuccessfulLogonDevice.png)
 
+- Both successful logon events were from same authorized user
 - Account: `labuser`
 - Number of failed logons: 0
 - IP address origin was verified and authorized
