@@ -10,7 +10,7 @@ During routine maintenance, the security team was tasked with investigating virt
 ## 🧭 Lab Setup
 
 - **Target VM**: `windows-target-1`
-- **Duration of Exposure**: At least 7 days
+- **Duration of Exposure**: 7 days
 - **Log Sources Used**:
   - `DeviceInfo`
   - `DeviceLogonEvents`
