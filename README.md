@@ -1,25 +1,26 @@
 
-
 # ⚔️ Threat Hunting Lab: Devices Accidentally Exposed to the Internet
 
 ## 🧪 Scenario Summary
 
-During routine maintenance, the security team was tasked with investigating any virtual machines (VMs) in the shared services cluster (handling DNS, Domain Services, DHCP, etc.) that were mistakenly exposed to the public internet. The focus was on identifying misconfigurations and investigating brute-force login attempts.
+During routine maintenance, the security team was tasked with investigating virtual machines (VMs) in the shared services cluster that may have been mistakenly exposed to the public internet. The goal was to identify misconfigured devices and determine if any brute-force login attempts or successes occurred.
 
 ---
 
 ## 🧭 Lab Setup
 
 - **Target VM**: `windows-target-1`
-- **Exposure Duration**: > 7 days
-- **Log Source Tables**: `DeviceInfo`, `DeviceLogonEvents`
-- **Threat Hypothesis**: Public exposure of VMs without lockout policies could lead to successful brute-force login attempts.
+- **Duration of Exposure**: At least 7 days
+- **Log Sources Used**:
+  - `DeviceInfo`
+  - `DeviceLogonEvents`
+- **Hypothesis**: Publicly exposed VMs without account lockout policies are vulnerable to brute-force login attacks.
 
 ---
 
 ## 🔍 Phase 1: Data Collection
 
-**Confirm internet exposure**:
+Check for internet-facing devices:
 ```kql
 DeviceInfo
 | where DeviceName == "windows-target-1"
@@ -27,63 +28,7 @@ DeviceInfo
 | order by Timestamp desc
 ```
 
----
-
-## 📊 Phase 2: Data Analysis
-
-### 🔒 Check Most Failed Logon Attempts
-```kql
-DeviceLogonEvents
-| where LogonType has_any("Network", "Interactive", "RemoteInteractive", "Unlock")
-| where ActionType == "LogonFailed"
-| where isnotempty(RemoteIP)
-| summarize Attempts = count() by ActionType, RemoteIP, DeviceName
-| order by Attempts desc
-```
-
-### 🎯 Investigate if Any of Those IPs Succeeded
-```kql
-let RemoteIPsInQuestion = dynamic(["119.42.115.235", "183.81.169.238", "74.39.190.50", "121.30.214.172", "83.222.191.62", "45.41.204.12", "192.109.240.116"]);
-DeviceLogonEvents
-| where LogonType has_any("Network", "Interactive", "RemoteInteractive", "Unlock")
-| where ActionType == "LogonSuccess"
-| where RemoteIP has_any(RemoteIPsInQuestion)
-```
-
-### 🧠 Correlate Failed and Successful Logons
-```kql
-let FailedLogons = DeviceLogonEvents
-| where LogonType has_any("Network", "Interactive", "RemoteInteractive", "Unlock")
-| where ActionType == "LogonFailed"
-| where isnotempty(RemoteIP)
-| summarize FailedLogonAttempts = count() by RemoteIP, DeviceName;
-
-let SuccessfulLogons = DeviceLogonEvents
-| where LogonType has_any("Network", "Interactive", "RemoteInteractive", "Unlock")
-| where ActionType == "LogonSuccess"
-| where isnotempty(RemoteIP)
-| summarize SuccessfulLogons = count() by RemoteIP, DeviceName, AccountName;
-
-FailedLogons
-| join kind=inner (SuccessfulLogons) on RemoteIP
-| project RemoteIP, DeviceName, FailedLogonAttempts, SuccessfulLogons, AccountName
-```
-
----
-
-## 📌 Timeline Summary & Findings
-
-- **Internet Exposure Confirmed**:
-```kql
-DeviceInfo
-| where DeviceName == "windows-target-1"
-| where IsInternetFacing == true
-| order by Timestamp desc
-```
-
-- **Exposure Detected As Of**: `2025-05-21T05:07:28Z`
-
-- **Action Type Distribution**:
+Check logon actions on the target device:
 ```kql
 DeviceLogonEvents
 | where DeviceName == "windows-target-1"
@@ -91,7 +36,11 @@ DeviceLogonEvents
 | order by count_ desc
 ```
 
-- **Multiple Remote IPs Attempted Unauthorized Access**:
+---
+
+## 📊 Phase 2: Data Analysis
+
+Identify failed logon attempts from remote IPs:
 ```kql
 DeviceLogonEvents
 | where DeviceName == "windows-target-1"
@@ -102,22 +51,22 @@ DeviceLogonEvents
 | order by Attempts desc
 ```
 
-- **Top Offending IPs Had No Successful Logons**:
+Check if any of the top offending IPs succeeded:
 ```kql
-let RemoteIPsInQuestion = dynamic(["45.227.254.130", "197.210.194.240", "194.180.49.123", "185.156.73.226", "38.55.247.6", "185.39.19.57", "122.11.143.53"]);
+let RemoteIPsInQuestion = dynamic(["45.227.254.130","197.210.194.240", "194.180.49.123", "185.156.73.226", "38.55.247.6", "185.39.19.57", "122.11.143.53"]);
 DeviceLogonEvents
 | where LogonType has_any("Network", "Interactive", "RemoteInteractive", "Unlock")
 | where ActionType == "LogonSuccess"
 | where RemoteIP has_any(RemoteIPsInQuestion)
 ```
-> ✅ No results returned — no successful logons from suspicious IPs.
+
+> ✅ No results were returned, indicating no successful logons from these IPs.
 
 ---
 
 ## ✅ Verified Legitimate Logons
 
-Only two successful remote logons were detected in the last 30 days:
-
+Check for valid logons by a known account:
 ```kql
 DeviceLogonEvents
 | where DeviceName == "windows-target-1"
@@ -126,13 +75,13 @@ DeviceLogonEvents
 | where AccountName == "labuser"
 ```
 
-- **Account**: `labuser`  
-- **Failed logons**: `0`  
-- **IP origin**: Verified authorized
+- Account: `labuser`
+- Number of failed logons: 0
+- IP address origin was verified and authorized
 
 ---
 
-## 🔐 Mapped MITRE ATT&CK TTPs
+## 🧠 MITRE ATT&CK TTP Mapping
 
 | ID          | Technique                                 |
 |-------------|--------------------------------------------|
@@ -142,18 +91,22 @@ DeviceLogonEvents
 
 ---
 
-## 🧯 Response & Recommendations
+## 🧯 Response Actions
 
-- ✅ **No unauthorized access** was confirmed.
-- 🔒 Harden NSG to restrict RDP to trusted IPs only.
-- 🔐 Enforce **account lockout** policies for repeated failed attempts.
-- 🔐 Implement **Multi-Factor Authentication (MFA)** for all remote access.
+- Restrict RDP traffic using NSG rules to trusted IPs only
+- Implement account lockout policies
+- Enforce multi-factor authentication (MFA)
 
 ---
 
-## 🧠 Lessons Learned
+## 📝 Conclusion
 
-- Use security group rules to reduce exposure of critical services.
-- Monitor `DeviceLogonEvents` for early signs of brute-force activity.
-- Combine detection with ATT&CK mapping for contextual response.
-- Validate and document successful logons to eliminate false positives.
+Although `windows-target-1` was internet-facing for at least 7 days and received numerous brute-force login attempts, no evidence of unauthorized access was found. All successful logons were tied to a known account (`labuser`) from an authorized location.
+
+---
+
+## 🔄 Lessons Learned
+
+- Restrict access to public services whenever possible
+- Monitor remote logon events for patterns of brute-force attempts
+- Implement and regularly review MFA and account lockout policies
