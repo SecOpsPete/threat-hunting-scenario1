@@ -14,7 +14,7 @@ During routine maintenance, the security team was tasked with investigating virt
 - **Log Sources Used**:
   - `DeviceInfo`
   - `DeviceLogonEvents`
-- **Hypothesis**: Publicly exposed VMs without account lockout policies are vulnerable to brute-force login attacks.
+- **Hypothesis**: Publicly exposed VMs without account lockout policies were vulnerable to brute-force login attacks.
 
 ---
 
