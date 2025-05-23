@@ -1,6 +1,13 @@
 
 # ⚔️ Threat Hunting Lab: Devices Accidentally Exposed to the Internet
 
+## 🧰 Technologies Used
+
+- 🛡️ **Microsoft Defender for Endpoint** – Provided DeviceInfo and DeviceLogonEvents telemetry  
+- 🔎 **Kusto Query Language (KQL)** – Used for querying logon data, failed login attempts, and remote IP sources  
+- 🧠 **MITRE ATT&CK Framework** – Mapped observed behavior to known adversary techniques  
+- ☁️ **Azure NSG (Network Security Groups)** – Referenced in response recommendations to restrict RDP access
+
 ## 🧪 Scenario Summary
 
 During routine maintenance, the security team was tasked with investigating virtual machines (VMs) in the shared services cluster that may have been mistakenly exposed to the public internet. The goal was to identify misconfigured devices and determine if any brute-force login attempts or successes occurred.
